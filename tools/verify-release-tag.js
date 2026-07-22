@@ -16,8 +16,10 @@ function fail(message) {
 if (!tag) {
   fail('A Git tag argument is required.');
 }
-if (!/^2\.4\.0(?:-beta\.[1-9][0-9]*)?$/.test(packageJson.version)) {
-  fail(`Unsupported release version ${packageJson.version}. Expected 2.4.0 or 2.4.0-beta.N.`);
+if (!/^[0-9]+\.[0-9]+\.[0-9]+(?:-(?:beta|rc)\.[1-9][0-9]*)?$/.test(packageJson.version)) {
+  fail(
+    `Unsupported release version ${packageJson.version}. Expected MAJOR.MINOR.PATCH optionally suffixed with -beta.N or -rc.N.`
+  );
 }
 if (tag !== `v${packageJson.version}`) {
   fail(`Tag ${tag} does not match package version ${packageJson.version}.`);

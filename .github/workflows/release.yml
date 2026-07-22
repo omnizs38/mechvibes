@@ -3,8 +3,9 @@ name: Windows release
 on:
   push:
     tags:
-      - "v2.4.0-beta.*"
-      - "v2.4.0"
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-beta.*"
+      - "v[0-9]+.[0-9]+.[0-9]+-rc.*"
 
 concurrency:
   group: release-${{ github.ref }}
@@ -116,7 +117,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           args=("${GITHUB_REF_NAME}" --verify-tag --generate-notes --title "Mechvibes ${GITHUB_REF_NAME}")
-          if [[ "${GITHUB_REF_NAME}" == *-beta.* ]]; then
+          if [[ "${GITHUB_REF_NAME}" == *-beta.* || "${GITHUB_REF_NAME}" == *-rc.* ]]; then
             args+=(--prerelease)
           fi
           gh release create "${args[@]}" dist/*
