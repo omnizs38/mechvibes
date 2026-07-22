@@ -59,7 +59,7 @@ function normalizeSoundReference(value, field = 'sound file') {
     segment === '' ||
     segment === '.' ||
     segment === '..' ||
-    /[<>:"|?*\u0000-\u001f]/.test(segment) ||
+    /[<>:"|?*]|\p{Cc}/u.test(segment) ||
     /[. ]$/.test(segment) ||
     unsafeWindowsName.test(segment)
   ))) {

@@ -13,6 +13,7 @@ const { VoicePool } = require('../src/audio-engine/voice-pool');
 const { WebAudioEngine, centsToPlaybackRate } = require('../src/audio-engine/web-audio-engine');
 const { loadHowls, loadSharedHowls, withTimeout } = require('../src/libs/soundpacks/audio-loader');
 const { SoundpackManager } = require('../src/libs/soundpacks/pack-manager');
+const { keycodesRemap } = require('../src/libs/keycodes');
 const { resolveSoundReference } = require('../src/libs/soundpacks/reference-resolver');
 const { discoverSoundpacks, verifySoundpackChecksums } = require('../src/libs/soundpacks/registry');
 const {
@@ -185,6 +186,17 @@ test('validates bundled v1 and v2 shapes', () => {
   const v2Manifest = createAudioManifest(v2, metadata, { getFile });
   assert.equal(v2Manifest.events['keydown:1'].samples.length, 1);
   assert.equal(v2Manifest.events['keyup:1'].samples.length, 1);
+});
+
+test('remaps Windows key aliases without emitting empty definitions', () => {
+  const regularKey = { sample: 'regular' };
+  const insertKey = { sample: 'insert' };
+  const remapped = keycodesRemap({ 1: regularKey, 3666: insertKey }, 'win32');
+  assert.equal(remapped['keycode-1'], regularKey);
+  assert.equal(remapped['keycode-3666'], insertKey);
+  assert.equal(remapped['keycode-61010'], insertKey);
+  assert.equal(Object.hasOwn(remapped, 'keycode-60999'), false);
+  assert.equal(Object.values(remapped).every((definition) => definition !== null && definition !== undefined), true);
 });
 
 test('validates v3 layers and adapts them to the unified audio manifest', () => {
