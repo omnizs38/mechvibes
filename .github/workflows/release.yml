@@ -97,10 +97,14 @@ jobs:
           retention-days: 14
 
   publish:
-    name: Publish approved GitHub Release
+    name: Stage draft GitHub Release for manual publish
     needs: build-windows-x64
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # This `environment: release` gate ONLY blocks if the "release" environment
+    # in repo Settings -> Environments has "Required reviewers" configured.
+    # That is a repo-setting, not something this YAML can enforce on its own —
+    # verify it is actually configured, or this line is a silent no-op.
     environment: release
     permissions:
       contents: write
@@ -111,13 +115,17 @@ jobs:
           name: windows-x64-release
           path: dist
 
-      - name: Publish stable or beta release
+      - name: Stage release as a draft (always — never auto-publish)
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          args=("${GITHUB_REF_NAME}" --verify-tag --generate-notes --title "Mechvibes ${GITHUB_REF_NAME}")
+          args=("${GITHUB_REF_NAME}" --verify-tag --generate-notes --title "Mechvibes ${GITHUB_REF_NAME}" --draft)
           if [[ "${GITHUB_REF_NAME}" == *-beta.* || "${GITHUB_REF_NAME}" == *-rc.* ]]; then
             args+=(--prerelease)
           fi
           gh release create "${args[@]}" dist/*
+          echo "### Release staged as DRAFT — requires manual publish" >> "$GITHUB_STEP_SUMMARY"
+          echo "This workflow intentionally never auto-publishes. A human must open" >> "$GITHUB_STEP_SUMMARY"
+          echo "the draft release, review the attached .exe/checksums/SBOM, and click" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Publish release** in the GitHub UI before it becomes publicly visible." >> "$GITHUB_STEP_SUMMARY"
