@@ -8,9 +8,9 @@
 4. Keep the workflow token at its default read-only scope; the protected publish job requests `contents: write` only after approval.
 5. Do not add signing certificates or passwords until Windows signing is intentionally configured.
 
-## Prepared beta candidate
+## Prepared stable candidate
 
-The next candidate is `2.4.0-beta.2`. Review its [release notes](release-notes-2.4.0-beta.2.md), merge the release preparation branch, and tag the resulting `main` commit as `v2.4.0-beta.2`. Do not tag the unmerged release branch.
+The current candidate is `2.4.0`. Review its [release notes](release-notes-2.4.0.md), merge the release preparation branch, and tag the resulting `main` commit as `v2.4.0`. Do not tag the unmerged release branch. The earlier beta notes remain available at [release-notes-2.4.0-beta.2.md](release-notes-2.4.0-beta.2.md).
 
 ## Beta release
 
@@ -29,7 +29,7 @@ Users on the stable channel do not receive beta releases. Beta users must opt in
 
 ## Stable release
 
-Repeat the process with package version `2.4.0` and tag `v2.4.0`. A stable release must not be tagged until the beta soak and Windows acceptance matrix pass.
+Repeat the process with package version `2.4.0` and tag `v2.4.0`, reviewing the [2.4.0 release notes](release-notes-2.4.0.md). A stable release must not be tagged until the beta soak and Windows acceptance matrix pass.
 
 ## Update behavior
 
