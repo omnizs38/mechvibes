@@ -159,14 +159,16 @@ const linux = JSON.parse(JSON.stringify(standard));
 
 // ==================================================
 // remap keycodes from standard to os based keycodes
-function keycodesRemap(defines) {
+function keycodesRemap(defines, targetPlatform = process.platform) {
   const remapper = require('../utils/remapper');
-  const sprite = remapper('standard', process.platform, {...defines});
-  Object.keys(sprite).map((kc) => {
-    sprite[`keycode-${kc}`] = sprite[kc];
-    delete sprite[kc];
-  });
-  return sprite;
+  const platformDefines = remapper('standard', targetPlatform, { ...defines });
+  const remapped = {};
+  for (const [keycode, definition] of Object.entries(platformDefines)) {
+    if (definition !== null && definition !== undefined) {
+      remapped[`keycode-${keycode}`] = definition;
+    }
+  }
+  return remapped;
 }
 
 function keycodesFill(defines){

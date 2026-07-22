@@ -19,7 +19,7 @@ function normalizeInstallSegment(value, field) {
     segment === '' ||
     segment === '.' ||
     segment === '..' ||
-    /[<>:"|?*\u0000-\u001f]/.test(segment) ||
+    /[<>:"|?*]|\p{Cc}/u.test(segment) ||
     /[. ]$/.test(segment) ||
     unsafeWindowsName.test(segment)
   ));
@@ -133,12 +133,9 @@ async function readResponseBuffer(response, maxBytes) {
   const reader = response.body.getReader();
   const chunks = [];
   let receivedBytes = 0;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    const chunk = Buffer.from(value);
+  let readResult = await reader.read();
+  while (!readResult.done) {
+    const chunk = Buffer.from(readResult.value);
     receivedBytes += chunk.length;
     if (receivedBytes > maxBytes) {
       try {
@@ -149,6 +146,7 @@ async function readResponseBuffer(response, maxBytes) {
       throw new Error(`Response exceeds the ${maxBytes} byte limit.`);
     }
     chunks.push(chunk);
+    readResult = await reader.read();
   }
   return Buffer.concat(chunks, receivedBytes);
 }
