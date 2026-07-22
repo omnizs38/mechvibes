@@ -11,7 +11,6 @@ const { SampleCache } = require('../src/audio-engine/sample-cache');
 const { SampleSelector } = require('../src/audio-engine/sample-selector');
 const { VoicePool } = require('../src/audio-engine/voice-pool');
 const { WebAudioEngine, centsToPlaybackRate } = require('../src/audio-engine/web-audio-engine');
-const { loadHowls, loadSharedHowls, withTimeout } = require('../src/libs/soundpacks/audio-loader');
 const { SoundpackManager } = require('../src/libs/soundpacks/pack-manager');
 const { keycodesRemap } = require('../src/libs/keycodes');
 const { resolveSoundReference } = require('../src/libs/soundpacks/reference-resolver');
@@ -131,40 +130,6 @@ class FakeUpdater extends EventEmitter {
   quitAndInstall(isSilent, forceRunAfter) {
     this.installCalls += 1;
     this.installArguments = [isSilent, forceRunAfter];
-  }
-}
-
-class FakeHowl {
-  constructor() {
-    this.handlers = new Map();
-    this.loaded = false;
-    this.unloaded = false;
-  }
-
-  state() {
-    return this.loaded ? 'loaded' : 'loading';
-  }
-
-  once(event, callback) {
-    this.handlers.set(event, callback);
-  }
-
-  off(event, callback) {
-    if (this.handlers.get(event) === callback) {
-      this.handlers.delete(event);
-    }
-  }
-
-  emit(event, ...arguments_) {
-    const callback = this.handlers.get(event);
-    if (callback) {
-      this.handlers.delete(event);
-      callback(...arguments_);
-    }
-  }
-
-  unload() {
-    this.unloaded = true;
   }
 }
 
@@ -405,45 +370,6 @@ test('honors a repeated latest choice across overlapping loads', async () => {
   assert.equal(second.loadCalls, 1);
 });
 
-test('waits for all audio resources and unloads all on failure', async () => {
-  const first = new FakeHowl();
-  const second = new FakeHowl();
-  const loading = loadHowls([
-    { key: 'first', audio: first },
-    { key: 'second', audio: second },
-  ], { timeoutMs: 100 });
-  first.loaded = true;
-  first.emit('load');
-  let settled = false;
-  loading.then(
-    () => { settled = true; },
-    () => { settled = true; },
-  );
-  await Promise.resolve();
-  assert.equal(settled, false);
-  second.emit('loaderror', null, 'decode failed');
-  await assert.rejects(loading, /decode failed/);
-  assert.equal(first.unloaded, true);
-  assert.equal(second.unloaded, true);
-});
-
-test('shares one Howl instance across keys with the same source', async () => {
-  let created = 0;
-  const audioByKey = await loadSharedHowls({
-    'keycode-1': { src: ['same.wav'] },
-    'keycode-2': { src: ['same.wav'] },
-    'keycode-3': { src: ['other.wav'] },
-  }, () => {
-    created += 1;
-    const audio = new FakeHowl();
-    audio.loaded = true;
-    return audio;
-  });
-  assert.equal(created, 2);
-  assert.equal(audioByKey['keycode-1'], audioByKey['keycode-2']);
-  assert.notEqual(audioByKey['keycode-1'], audioByKey['keycode-3']);
-});
-
 test('deduplicates decoded audio and evicts least-recently-used samples', async () => {
   let fetchCalls = 0;
   let clock = 0;
@@ -579,10 +505,6 @@ test('schedules a buffered v3 sound through one Web Audio graph', async () => {
   assert.equal(starts.length, 1);
   assert.equal(engine.getStats().voices.activeVoices, 1);
   await engine.dispose();
-});
-
-test('applies a timeout to stalled audio loading', async () => {
-  await assert.rejects(withTimeout(new Promise(() => {}), 5, 'timed out'), /timed out/);
 });
 
 test('isolates malformed soundpack folders during discovery', () => {

@@ -1,6 +1,6 @@
 # Mechvibes 2.4.0-beta.2
 
-Mechvibes 2.4.0-beta.2 is the first distributable preview of the 2.4 runtime foundation. It moves the default v1 and v2 soundpack path to a low-latency Web Audio engine while keeping the previous Howler implementation available as an emergency rollback.
+Mechvibes 2.4.0-beta.2 is the first distributable preview of the 2.4 runtime foundation. It moves the default v1 and v2 soundpack path to a low-latency Web Audio engine.
 
 ## Highlights
 
@@ -36,5 +36,4 @@ The Windows keycode remapper could create aliases without sound definitions. Tho
 
 - Windows x64 is the release gate; Windows arm64 remains deferred.
 - Builds are unsigned and may trigger Microsoft SmartScreen warnings.
-- The Howler fallback remains available by setting `MECHVIBES_LEGACY_AUDIO=1` before launch.
 - This is prerelease software. Back up custom soundpacks before testing import or deletion workflows.

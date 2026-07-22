@@ -5,10 +5,9 @@ const fs = require('fs');
 const path = require('path');
 const { validateSoundpackConfig } = require('./validation');
 
-const useLegacyAudio = process.env.MECHVIBES_LEGACY_AUDIO === '1';
 const CONFIG_FACTORIES = {
-  1: () => require(useLegacyAudio ? './config-v1' : './config-web-audio'),
-  2: () => require(useLegacyAudio ? './config-v2' : './config-web-audio'),
+  1: () => require('./config-web-audio'),
+  2: () => require('./config-web-audio'),
   3: () => require('./config-v3'),
 };
 

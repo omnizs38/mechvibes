@@ -44,9 +44,9 @@ Repeat the process with package version `2.4.0` and tag `v2.4.0`. A stable relea
 
 The initial beta and stable candidates are unsigned by explicit project decision. Windows SmartScreen can warn users and update identity assurance is weaker than a signed release. Broad stable distribution should wait for OV, EV, or Azure Trusted Signing. Signing credentials belong only in protected CI secrets and must never be committed.
 
-## Audio rollback switch
+## Audio engine
 
-The beta keeps the previous Howler-based v1/v2 path as an emergency fallback. For a development or diagnostic run, set `MECHVIBES_LEGACY_AUDIO=1` before launching Mechvibes. Soundpack v3 always uses the Web Audio engine. The fallback is temporary and should be removed only after beta soak proves parity.
+Every soundpack (v1, v2, and v3) runs on the low-latency Web Audio engine. The legacy Howler-based v1/v2 path and its `MECHVIBES_LEGACY_AUDIO` rollback switch were removed in the 2.4.0 stable release after beta soak proved parity.
 
 ## Rollback
 

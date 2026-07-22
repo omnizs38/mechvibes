@@ -63,20 +63,18 @@ class Element {
   }
 }
 
-async function runRendererSmoke(repositoryRoot, { expectedHowlCount = 0, expectedDecodedSamples = 1 } = {}) {
+async function runRendererSmoke(repositoryRoot, { expectedDecodedSamples = 1 } = {}) {
   const originalLoad = Module._load;
   const originalAudioContextDescriptor = Object.getOwnPropertyDescriptor(global, 'AudioContext');
   const originalNavigatorDescriptor = Object.getOwnPropertyDescriptor(global, 'navigator');
   const originalGlobals = {
     document: global.document,
     fetch: global.fetch,
-    Howler: global.Howler,
     window: global.window,
   };
   const customDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'mechvibes-renderer-'));
   const values = new Map([['mechvibes-pack', 'default-cherrymx-black-abs']]);
   const ipcListeners = new Map();
-  let howlCount = 0;
   let decodedSamples = 0;
 
   class Store {
@@ -84,32 +82,6 @@ async function runRendererSmoke(repositoryRoot, { expectedHowlCount = 0, expecte
     get(key) { return values.get(key); }
     set(key, value) { values.set(key, value); }
   }
-
-  class Howl {
-    constructor(options) {
-      this.options = options;
-      howlCount += 1;
-    }
-    state() { return 'loaded'; }
-    play() {}
-    unload() {}
-    once() {}
-    off() {}
-  }
-
-  const howler = {
-    Howl,
-    Howler: {
-      ctx: {
-        currentTime: 0,
-        state: 'running',
-        resume: () => Promise.resolve(),
-      },
-      masterGain: {
-        gain: { setValueAtTime() {} },
-      },
-    },
-  };
 
   const parameter = () => ({
     value: 0,
@@ -222,7 +194,6 @@ async function runRendererSmoke(repositoryRoot, { expectedHowlCount = 0, expecte
     if (request === 'electron') return electron;
     if (request === '@electron/remote') return electron.remote;
     if (request === 'electron-store') return Store;
-    if (request === 'howler') return howler;
     if (request === 'glob') {
       return {
         sync(pattern) {
@@ -251,7 +222,6 @@ async function runRendererSmoke(repositoryRoot, { expectedHowlCount = 0, expecte
 
   global.document = document;
   global.window = window;
-  global.Howler = howler.Howler;
   Object.defineProperty(global, 'AudioContext', {
     configurable: true,
     writable: true,
@@ -291,22 +261,18 @@ async function runRendererSmoke(repositoryRoot, { expectedHowlCount = 0, expecte
     if (elements.get('pack-list').children.length === 0) {
       throw new Error('Renderer did not populate the soundpack selector.');
     }
-    if (expectedHowlCount !== null && howlCount !== expectedHowlCount) {
-      throw new Error(`Expected ${expectedHowlCount} initial Howl instance(s); created ${howlCount}.`);
-    }
     if (expectedDecodedSamples !== null && decodedSamples !== expectedDecodedSamples) {
       throw new Error(`Expected ${expectedDecodedSamples} decoded sample(s); decoded ${decodedSamples}.`);
     }
     if (typeof beforeUnload === 'function') {
       beforeUnload();
     }
-    return { howlCount, decodedSamples };
+    return { decodedSamples };
   } finally {
     delete require.cache[require.resolve(appPath)];
     Module._load = originalLoad;
     global.document = originalGlobals.document;
     global.fetch = originalGlobals.fetch;
-    global.Howler = originalGlobals.Howler;
     if (originalAudioContextDescriptor) {
       Object.defineProperty(global, 'AudioContext', originalAudioContextDescriptor);
     } else {

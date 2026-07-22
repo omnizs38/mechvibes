@@ -44,9 +44,9 @@ _This repository will remain available during the transition period._
 
 # Mechvibes: A fun and practical way to bring your favorite keyboard sounds anywhere
 
-## 2.4 beta direction
+## 2.4 direction
 
-The 2.4 line modernizes the Electron runtime and global input hook, introduces consent-based stable and beta updates, adds an experimental low-latency Web Audio engine for soundpack v3, and preserves v1/v2 compatibility. It also adds output-device selection, safer soundpack management, dark mode, stronger release gates, and automated Windows release assets.
+The 2.4 line modernizes the Electron runtime and global input hook, introduces consent-based stable and beta updates, and runs every soundpack (v1, v2, and v3) on a single low-latency Web Audio engine. It also adds output-device selection, safer soundpack management, dark mode, stronger release gates, and automated Windows release assets.
 
 - Soundpack v3 specification: [docs/soundpack-v3.md](docs/soundpack-v3.md)
 - Automated release process: [docs/releases.md](docs/releases.md)

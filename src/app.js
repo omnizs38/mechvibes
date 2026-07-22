@@ -7,7 +7,6 @@ const electron = require('electron');
 electron.remote = require('@electron/remote');
 const Store = require('electron-store');
 const store = new Store();
-const { Howler } = require('howler');
 const { shell, ipcRenderer } = electron;
 const remote = electron.remote;
 const path = require('path');
@@ -107,9 +106,6 @@ async function selectPack(packId, { persist = true } = {}) {
     }
     if (persist) {
       store.set(MV_PACK_LSID, loadedPack.pack_id);
-    }
-    if (Howler.ctx && Howler.ctx.state === 'suspended') {
-      Howler.ctx.resume().catch(() => {});
     }
     appLogo.textContent = 'Mechvibes';
     appBody.classList.remove('loading');
@@ -362,8 +358,6 @@ function packsToOptions(soundpacks, packList) {
       if (!current_pack) throw new Error('No soundpack is active.');
       if (typeof current_pack.SetOutputDevice === 'function') {
         await current_pack.SetOutputDevice(deviceId);
-      } else if (Howler.ctx && typeof Howler.ctx.setSinkId === 'function') {
-        await Howler.ctx.setSinkId(deviceId || '');
       } else {
         throw new Error('Output selection is not supported by this audio engine.');
       }
@@ -626,8 +620,6 @@ function playSound(event, volume) {
   if (gain !== last_applied_gain) {
     if (typeof current_pack.SetMasterGain === 'function') {
       current_pack.SetMasterGain(gain);
-    } else {
-      Howler.masterGain.gain.setValueAtTime(gain, Howler.ctx.currentTime);
     }
     last_applied_gain = gain;
   }
