@@ -1,7 +1,8 @@
-Mechvibes-MPL
+Mechvibes
 Copyright (c) 2026 omnizs38
 
-This repository is a fork of the original Mechvibes project.
+This repository is an actively maintained fork of the original
+Mechvibes project.
 
 Original project:
 https://github.com/hainguyents13/mechvibes
@@ -9,19 +10,27 @@ https://github.com/hainguyents13/mechvibes
 Original author:
 Hai Nguyen
 
-Original project copyright:
+Original copyright:
 Copyright (c) 2021 Hai Nguyen
 
 Licensing
+----------
 
-- The original upstream source code is licensed under the MIT License.
-  See LICENSE.MIT.
+This repository contains source code originally released under the
+MIT License by Hai Nguyen.
 
-- Modifications and new contributions made by omnizs38 are licensed
-  under the Mozilla Public License, Version 2.0.
-  See LICENSE.MPL.
+The original MIT License is preserved in the LICENSE.MIT file.
 
-The inclusion of the original MIT License is required to preserve the
-copyright notice and license terms applicable to the upstream source
-code. Rights granted under the original MIT License remain in effect
-for that upstream code.
+Modifications and new contributions made by omnizs38 are licensed
+under the Mozilla Public License Version 2.0 (MPL-2.0).
+
+The full text of the MPL-2.0 is provided in the LICENSE file.
+
+Nothing in this NOTICE modifies or revokes the rights granted under
+the original MIT License for the upstream source code.
+
+Acknowledgements
+----------------
+
+Thanks to Hai Nguyen for creating the original Mechvibes project and
+to everyone who has contributed to the upstream project and this fork.
