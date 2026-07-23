@@ -34,7 +34,7 @@
   },
   "license": "MPL-2.0",
   "build": {
-    "appId": "com.electron.mechvibes",
+    "appId": "com.electron.mechvibes-cbc",
     "artifactName": "Mechvibes-${version}-${arch}.${ext}",
     "files": [
       "src/**/*",
