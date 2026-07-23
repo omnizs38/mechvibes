@@ -83,6 +83,12 @@ jobs:
           node-version: 22.22.0
           cache: npm
 
+      - name: Install native X11 and build-essential header libraries (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxtst-dev libxext-dev libx11-xcb-dev libxkbcommon-dev libxkbcommon-x11-dev
+
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
@@ -185,6 +191,7 @@ jobs:
           fi
           gh release create "${args[@]}" dist-merged/*
           echo "### Release staged as DRAFT — requires manual publish" >> "$GITHUB_STEP_SUMMARY"
+          echo "This workflow has safely built, compiled, and merged artifacts" >> "$GITHUB_STEP_SUMMARY"
           echo "This workflow has safely built, compiled, and merged artifacts" >> "$GITHUB_STEP_SUMMARY"
           echo "from all three major operating systems (Windows, macOS, and Linux)." >> "$GITHUB_STEP_SUMMARY"
           echo "A human must manually publish the draft release in the GitHub UI." >> "$GITHUB_STEP_SUMMARY"

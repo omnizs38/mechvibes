@@ -88,6 +88,12 @@ jobs:
           node-version: 22.22.0
           cache: npm
 
+      - name: Install native X11 and build-essential header libraries (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libx11-dev libxtst-dev libxext-dev libx11-xcb-dev libxkbcommon-dev libxkbcommon-x11-dev
+
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
 
