@@ -1,4 +1,4 @@
-# Mechvibes
+# Mechvibes-cbc
 
 <p align="center">
   <img src="https://mechvibes.com/images/icon.png" alt="Mechvibes Logo" width="128">
