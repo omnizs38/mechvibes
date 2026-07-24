@@ -27,8 +27,8 @@ if (tag !== `v${packageJson.version}`) {
 if (packageLock.version !== packageJson.version || packageLock.packages[''].version !== packageJson.version) {
   fail('package.json and package-lock.json versions differ.');
 }
-if (packageJson.repository !== 'https://github.com/omnizs38/mechvibes') {
-  fail('Repository metadata must target omnizs38/mechvibes.');
+if (packageJson.repository !== 'https://github.com/omnizs38/mechvibes-cbc') {
+  fail('Repository metadata must target omnizs38/mechvibes-cbc.');
 }
 if (!packageJson.build || !Array.isArray(packageJson.build.publish)) {
   fail('electron-builder publish configuration is missing.');
