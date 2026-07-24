@@ -46,6 +46,11 @@ jobs:
     needs: validate
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
+    env:
+      # Without this, electron-builder tries to auto-discover a codesign
+      # identity in the runner's empty keychain and can fail/hang on macOS
+      # when no Apple Developer certificate is configured in secrets.
+      CSC_IDENTITY_AUTO_DISCOVERY: false
     strategy:
       fail-fast: false
       matrix:
@@ -87,7 +92,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libx11-dev libxtst-dev libxext-dev libx11-xcb-dev libxkbcommon-dev libxkbcommon-x11-dev
+          sudo apt-get install -y libx11-dev libxtst-dev libxext-dev libx11-xcb-dev libxkbcommon-dev libxkbcommon-x11-dev libxrandr-dev libxinerama-dev libxi-dev libxt-dev
 
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
@@ -127,13 +132,7 @@ jobs:
         with:
           name: ${{ matrix.artifact-name }}
           path: |
-            dist/*.exe
-            dist/*.dmg
-            dist/*.deb
-            dist/*.AppImage
-            dist/*.snap
-            dist/*.blockmap
-            dist/*.yml
+            ${{ matrix.artifact-path }}
             dist/SHA256SUMS.txt
             dist/sbom.cdx.json
           if-no-files-found: error
@@ -191,7 +190,6 @@ jobs:
           fi
           gh release create "${args[@]}" dist-merged/*
           echo "### Release staged as DRAFT — requires manual publish" >> "$GITHUB_STEP_SUMMARY"
-          echo "This workflow has safely built, compiled, and merged artifacts" >> "$GITHUB_STEP_SUMMARY"
           echo "This workflow has safely built, compiled, and merged artifacts" >> "$GITHUB_STEP_SUMMARY"
           echo "from all three major operating systems (Windows, macOS, and Linux)." >> "$GITHUB_STEP_SUMMARY"
           echo "A human must manually publish the draft release in the GitHub UI." >> "$GITHUB_STEP_SUMMARY"
