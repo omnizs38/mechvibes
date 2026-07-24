@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mechvibes-cbc — Mechanical keyboard sounds for any keyboard</title>
+<meta name="description" content="Mechvibes-cbc brings realistic mechanical keyboard audio to whatever you're typing on — laptop, membrane, or silent office keyboard — on Windows, macOS, and Linux.">
+<meta property="og:title" content="Mechvibes-cbc — Mechanical keyboard sounds for any keyboard">
+<meta property="og:description" content="An actively maintained fork of Mechvibes: modern Electron runtime, low-latency audio engine, soundpack v3 support.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://github.com/omnizs38/mechvibes-cbc">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2317181B'/%3E%3Crect x='7' y='9' width='18' height='14' rx='3' fill='none' stroke='%23C4432B' stroke-width='2.2'/%3E%3Crect x='12' y='19' width='8' height='2.4' rx='1.2' fill='%23C4432B'/%3E%3C/svg%3E">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
 
@@ -36,6 +43,12 @@
   a{color:inherit;}
   ::selection{background:var(--red);color:#fff;}
 
+  :focus-visible{
+    outline:2px solid var(--red);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important; transition:none !important;}
   }
@@ -51,11 +64,13 @@
   }
   .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;}
   .brand-dot{width:9px;height:9px;background:var(--red);border-radius:2px;display:inline-block;}
-  nav a{font-size:13px;color:var(--ink-dim);text-decoration:none;margin-left:28px;}
-  nav a:hover{color:var(--ink);}
+  nav{display:flex; align-items:center;}
+  nav a.nav-link{font-size:13px;color:var(--ink-dim);text-decoration:none;margin-left:28px;}
+  nav a.nav-link:hover{color:var(--ink);}
   .gh-btn{
     border:1px solid var(--rule); padding:8px 16px; border-radius:6px;
-    font-size:13px; text-decoration:none; color:var(--ink);
+    font-size:13px; text-decoration:none; color:var(--ink); margin-left:28px;
+    display:inline-flex; align-items:center; gap:6px;
   }
   .gh-btn:hover{border-color:var(--red);}
 
@@ -71,6 +86,10 @@
     padding:5px 12px; border-radius:20px; margin-bottom:28px;
   }
   .eyebrow b{color:var(--red);font-weight:600;}
+  .eyebrow .ver{
+    font-family:'JetBrains Mono',monospace; color:var(--ink);
+    border-left:1px solid var(--rule); padding-left:8px; margin-left:2px;
+  }
   .hero h1{
     font-size:clamp(38px,6vw,72px);
     line-height:1.04; margin:0 0 22px; font-weight:800;
@@ -80,23 +99,26 @@
   .hero p{
     font-size:18px; color:var(--ink-dim); max-width:560px; line-height:1.6; margin:0 0 36px;
   }
-  .hero-ctas{display:flex; gap:14px; margin-bottom:70px;}
+  .hero-ctas{display:flex; gap:14px; margin-bottom:70px; flex-wrap:wrap;}
   .btn-primary{
     background:var(--red); color:#fff; padding:13px 24px; border-radius:6px;
     font-weight:600; font-size:14px; text-decoration:none;
     box-shadow:0 0 0 1px rgba(196,67,43,0.4);
     transition:transform .15s ease, box-shadow .15s ease;
+    display:inline-block;
   }
   .btn-primary:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(196,67,43,0.35);}
   .btn-secondary{
     border:1px solid var(--rule); padding:13px 24px; border-radius:6px;
     font-size:14px; text-decoration:none; color:var(--ink);
+    display:inline-block;
   }
   .btn-secondary:hover{border-color:var(--ink-dim);}
 
   /* ---------- signature: interactive keyboard row ---------- */
   .keyboard{
     display:flex; gap:8px; flex-wrap:wrap; user-select:none;
+    list-style:none; padding:0; margin:0;
   }
   .key{
     position:relative;
@@ -108,6 +130,8 @@
     min-width:74px;
     text-align:center;
     cursor:pointer;
+    color:inherit;
+    font:inherit;
     transition:transform .06s ease, border-bottom-width .06s ease, box-shadow .12s ease;
   }
   .key .cap{font-size:12px;font-weight:600;color:var(--ink);}
@@ -172,12 +196,14 @@
   }
   .comment{color:var(--ink-dim);}
   .cmd{color:#9FD3A8;}
+  .req-note{font-size:12px; color:var(--ink-dim); margin:14px 0 0;}
 
   footer{
     border-top:1px solid var(--rule);
     padding:40px; text-align:center; color:var(--ink-dim); font-size:13px;
   }
   footer a{color:var(--ink); text-decoration:underline; text-underline-offset:3px;}
+  footer .license-note{margin-top:8px; font-size:12px;}
 
   @media (max-width:720px){
     .grid{grid-template-columns:1fr;}
@@ -186,37 +212,42 @@
     .hero{padding:70px 20px 60px;}
     section{padding:50px 20px;}
   }
+  @media (max-width:560px){
+    nav a.nav-link{display:none;}
+    .gh-btn{margin-left:0;}
+  }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="brand"><span class="brand-dot"></span>mechvibes-cbc</div>
-  <nav>
-    <a href="#features">Features</a>
-    <a href="#whatsnew">What's new</a>
-    <a href="#install">Install</a>
+  <div class="brand"><span class="brand-dot" aria-hidden="true"></span>mechvibes-cbc</div>
+  <nav aria-label="Primary">
+    <a class="nav-link" href="#features">Features</a>
+    <a class="nav-link" href="#whatsnew">What's new</a>
+    <a class="nav-link" href="#install">Install</a>
     <a class="gh-btn" href="https://github.com/omnizs38/mechvibes-cbc" target="_blank" rel="noopener">View on GitHub</a>
   </nav>
 </header>
 
+<main>
 <div class="hero">
-  <span class="eyebrow"><b>fork</b> of hainguyents13/mechvibes — actively maintained</span>
+  <span class="eyebrow"><b>fork</b> of hainguyents13/mechvibes — actively maintained<span class="ver mono">v2.4.1</span></span>
   <h1>Every keyboard should <span class="accent">sound</span> like a mechanical one.</h1>
   <p>Mechvibes-cbc brings realistic mechanical keyboard audio to whatever you're typing on — laptop, membrane, silent office keyboard — on Windows, macOS, and Linux.</p>
   <div class="hero-ctas">
-    <a class="btn-primary" href="https://github.com/omnizs38/mechvibes/releases/latest" target="_blank" rel="noopener">Download latest release</a>
+    <a class="btn-primary" href="https://github.com/omnizs38/mechvibes-cbc/releases/latest" target="_blank" rel="noopener">Download latest release</a>
     <a class="btn-secondary" href="#install">Build from source</a>
   </div>
 
-  <div class="keyboard" id="keyboard">
-    <div class="key" data-switch="red"><span class="cap">SND</span><span class="sub">v1·v2·v3</span></div>
-    <div class="key" data-switch="blue"><span class="cap">LAT</span><span class="sub">low‑latency</span></div>
-    <div class="key" data-switch="brown"><span class="cap">DEV</span><span class="sub">output select</span></div>
-    <div class="key" data-switch="red"><span class="cap">DRK</span><span class="sub">dark mode</span></div>
-    <div class="key" data-switch="blue"><span class="cap">MSE</span><span class="sub">mouse sounds</span></div>
-    <div class="key" data-switch="brown"><span class="cap">UPD</span><span class="sub">stable / beta</span></div>
-  </div>
+  <ul class="keyboard" id="keyboard">
+    <li><button type="button" class="key" data-switch="red"><span class="cap">SND</span><span class="sub">v1·v2·v3</span></button></li>
+    <li><button type="button" class="key" data-switch="blue"><span class="cap">LAT</span><span class="sub">low‑latency</span></button></li>
+    <li><button type="button" class="key" data-switch="brown"><span class="cap">DEV</span><span class="sub">output select</span></button></li>
+    <li><button type="button" class="key" data-switch="red"><span class="cap">DRK</span><span class="sub">dark mode</span></button></li>
+    <li><button type="button" class="key" data-switch="blue"><span class="cap">MSE</span><span class="sub">mouse sounds</span></button></li>
+    <li><button type="button" class="key" data-switch="brown"><span class="cap">UPD</span><span class="sub">stable / beta</span></button></li>
+  </ul>
   <div class="waveform" aria-hidden="true">
     <span style="animation-delay:0s"></span><span style="animation-delay:.1s"></span>
     <span style="animation-delay:.2s"></span><span style="animation-delay:.05s"></span>
@@ -225,28 +256,28 @@
     <span style="animation-delay:.35s"></span><span style="animation-delay:.12s"></span>
     <span style="animation-delay:.2s"></span><span style="animation-delay:.02s"></span>
   </div>
-  <p class="keyboard-caption">Click the keys — this row runs on the same audio engine as the app.</p>
+  <p class="keyboard-caption">Click or tab through the keys — this row runs on the same audio engine as the app.</p>
 </div>
 
 <section id="features">
   <div class="section-head">
-    <span class="tag">01 — Features</span>
+    <span class="tag">Features</span>
     <h2>Built to feel like a real board</h2>
     <p>The engine, the soundpacks, and the interface are all tuned around one goal: keys should feel instant and sound right.</p>
   </div>
   <div class="grid">
-    <div class="card"><span class="icon">🎹</span><h3>Realistic simulation</h3><p>Faithful mechanical keyboard audio, mapped key-by-key rather than looped generically.</p></div>
-    <div class="card"><span class="icon">🎵</span><h3>Soundpack v1 – v3</h3><p>Full backward compatibility with the original soundpack formats, plus the new v3 spec.</p></div>
-    <div class="card"><span class="icon">⚡</span><h3>Low-latency engine</h3><p>A Web Audio playback pipeline rebuilt for consistent timing under heavy typing.</p></div>
-    <div class="card"><span class="icon">🎧</span><h3>Output device select</h3><p>Route playback to any connected audio device without leaving the app.</p></div>
-    <div class="card"><span class="icon">🌙</span><h3>Dark mode</h3><p>An interface that matches the hours most mechanical-keyboard enthusiasts keep.</p></div>
-    <div class="card"><span class="icon">🖱️</span><h3>Keyboard & mouse</h3><p>Sound simulation isn't limited to keystrokes — clicks and scrolls are covered too.</p></div>
+    <div class="card"><span class="icon" aria-hidden="true">🎹</span><h3>Realistic simulation</h3><p>Faithful mechanical keyboard audio, mapped key-by-key rather than looped generically.</p></div>
+    <div class="card"><span class="icon" aria-hidden="true">🎵</span><h3>Soundpack v1 – v3</h3><p>Full backward compatibility with the original soundpack formats, plus the new v3 spec.</p></div>
+    <div class="card"><span class="icon" aria-hidden="true">⚡</span><h3>Low-latency engine</h3><p>A Web Audio playback pipeline rebuilt for consistent timing under heavy typing.</p></div>
+    <div class="card"><span class="icon" aria-hidden="true">🎧</span><h3>Output device select</h3><p>Route playback to any connected audio device without leaving the app.</p></div>
+    <div class="card"><span class="icon" aria-hidden="true">🌙</span><h3>Dark mode</h3><p>An interface that matches the hours most mechanical-keyboard enthusiasts keep.</p></div>
+    <div class="card"><span class="icon" aria-hidden="true">🖱️</span><h3>Keyboard & mouse</h3><p>Sound simulation isn't limited to keystrokes — clicks and scrolls are covered too.</p></div>
   </div>
 </section>
 
 <section id="whatsnew">
   <div class="section-head">
-    <span class="tag">02 — This fork</span>
+    <span class="tag">This fork</span>
     <h2>What's different from upstream</h2>
     <p>Same soundpack ecosystem, rebuilt runtime. This fork focuses on stability and modernization without breaking compatibility.</p>
   </div>
@@ -263,7 +294,7 @@
 
 <section id="install">
   <div class="section-head">
-    <span class="tag">03 — Get it running</span>
+    <span class="tag">Get it running</span>
     <h2>Install or build from source</h2>
     <p>Grab a packaged release, or build it yourself — requires Node.js 22.22.0.</p>
   </div>
@@ -277,12 +308,14 @@
 <span class="cmd">npm run build:mac</span>
 <span class="cmd">npm run build:linux</span></pre>
   </div>
+  <p class="req-note">On Linux, native input hooks need X11 headers (<code>libx11-dev</code>, <code>libxtst-dev</code>, <code>libxt-dev</code>, and friends) installed before building.</p>
 </section>
+</main>
 
 <footer>
   Fork maintained by <a href="https://github.com/omnizs38" target="_blank" rel="noopener">omnizs38</a> ·
-  Original project by <a href="https://github.com/hainguyents13/mechvibes" target="_blank" rel="noopener">Hai Nguyen</a> ·
-  Upstream code under MIT, fork contributions under MPL-2.0.
+  Original project by <a href="https://github.com/hainguyents13/mechvibes" target="_blank" rel="noopener">Hai Nguyen</a>
+  <div class="license-note">Upstream code under MIT · fork contributions under MPL-2.0.</div>
 </footer>
 
 <script>
