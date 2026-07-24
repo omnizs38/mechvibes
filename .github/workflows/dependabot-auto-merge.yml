@@ -1,0 +1,42 @@
+name: Dependabot auto-merge
+
+# Enables GitHub's auto-merge on Dependabot PRs that are patch/minor updates.
+# The PR still has to pass all required status checks (CI, CodeQL, etc.) before
+# it actually merges — auto-merge only arms it. Major bumps are intentionally
+# left for a human (and are already filtered out by .github/dependabot.yml).
+on:
+  pull_request:
+
+# Only ever acts on Dependabot's own PRs.
+permissions:
+  contents: read
+
+concurrency:
+  group: dependabot-automerge-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  auto-merge:
+    name: Enable auto-merge for patch/minor updates
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Guard hard on the actor so no human PR can ever trigger auto-merge.
+    if: github.actor == 'dependabot[bot]'
+    permissions:
+      # Needed to enable auto-merge and approve the PR.
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Fetch Dependabot update metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for patch and minor updates
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge --auto --squash "$PR_URL"

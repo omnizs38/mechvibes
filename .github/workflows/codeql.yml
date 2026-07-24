@@ -1,0 +1,51 @@
+name: CodeQL
+
+# Static security analysis for the JavaScript/TypeScript sources. Runs on PRs
+# into main (catch issues before merge), on pushes to main (track the default
+# branch), and weekly (surface newly-published queries against existing code).
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    # Weekly, Monday early morning UTC. Off the :00 mark to avoid the rush.
+    - cron: '23 6 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze JavaScript/TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      # Required to upload analysis results to the code-scanning dashboard.
+      security-events: write
+      # Needed for the CodeQL action to read the workflow run on private repos.
+      actions: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          # "security-and-quality" adds maintainability queries on top of the
+          # default security-focused set.
+          queries: security-and-quality
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"

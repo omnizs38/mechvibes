@@ -1,0 +1,75 @@
+name: Label PR size
+
+# Adds a single size/* label to each PR based on total lines changed, so the
+# maintainer can eyeball review effort at a glance. Self-contained: it creates
+# any missing size/* label on the fly and swaps out stale ones on re-runs.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: size-label-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  size-label:
+    name: Apply size label
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Compute and apply size label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const number = context.payload.pull_request.number;
+
+            // Ignore generated lockfile churn so vendored diffs don't skew size.
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner, repo, pull_number: number, per_page: 100,
+            });
+            const IGNORED = /(^|\/)(package-lock\.json|npm-shrinkwrap\.json|yarn\.lock|pnpm-lock\.yaml)$/;
+            const changed = files
+              .filter((f) => !IGNORED.test(f.filename))
+              .reduce((sum, f) => sum + f.additions + f.deletions, 0);
+
+            const tiers = [
+              { label: 'size/XS', max: 10, color: '3fb950' },
+              { label: 'size/S', max: 50, color: '2da44e' },
+              { label: 'size/M', max: 250, color: 'bf8700' },
+              { label: 'size/L', max: 1000, color: 'd29922' },
+              { label: 'size/XL', max: Infinity, color: 'cf222e' },
+            ];
+            const tier = tiers.find((t) => changed <= t.max);
+
+            // Ensure the label exists (idempotent) before assigning it.
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: tier.label });
+            } catch (err) {
+              if (err.status !== 404) throw err;
+              await github.rest.issues.createLabel({
+                owner, repo, name: tier.label, color: tier.color,
+                description: 'PR size by lines changed (auto-applied)',
+              });
+            }
+
+            // Remove any other size/* label left over from a previous push.
+            const current = await github.rest.issues.listLabelsOnIssue({
+              owner, repo, issue_number: number,
+            });
+            for (const l of current.data) {
+              if (l.name.startsWith('size/') && l.name !== tier.label) {
+                await github.rest.issues.removeLabel({
+                  owner, repo, issue_number: number, name: l.name,
+                });
+              }
+            }
+
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number: number, labels: [tier.label],
+            });
+            core.info(`Applied ${tier.label} (${changed} lines changed).`);

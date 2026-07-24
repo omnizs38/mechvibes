@@ -1,27 +1,38 @@
-name: Critical fix verification
+name: CI
+
+# Runs on every PR and on pushes to main. Proves the tree is sound
+# (syntax, tests, types, lint), audits dependencies, and confirms the app
+# still packages on all three target operating systems.
 on:
   pull_request:
   push:
     branches:
       - main
   workflow_dispatch:
+
+# Only the newest run per ref matters; cancel superseded in-flight runs.
 concurrency:
-  group: critical-fix-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+# Least privilege by default; jobs opt into more only where they need it.
 permissions:
   contents: read
+
 jobs:
   quality:
     name: Syntax, soundpacks, and tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
       - name: Use supported Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v4
         with:
-          node-version: 22.22.0
+          node-version-file: .nvmrc
           cache: npm
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
@@ -29,24 +40,30 @@ jobs:
         run: npm run verify
       - name: Check audio scheduler budget
         run: npm run benchmark:audio
+
   dependency-review:
     name: Dependency review
+    # Only meaningful on PRs — it diffs the base ref against the head ref.
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
       - name: Reject newly introduced vulnerable dependencies
-        uses: actions/dependency-review-action@v5
+        uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
+
   build:
     name: Build test on ${{ matrix.os }}
     needs: quality
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -69,11 +86,11 @@ jobs:
               dist/**/*.snap
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
       - name: Use supported Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@v4
         with:
-          node-version: 22.22.0
+          node-version-file: .nvmrc
           cache: npm
       - name: Install native X11 and build-essential header libraries (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -87,7 +104,7 @@ jobs:
       - name: Build packages
         run: ${{ matrix.build-cmd }}
       - name: Upload compiled artifacts
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
           path: ${{ matrix.artifact-path }}
